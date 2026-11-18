@@ -1,8 +1,10 @@
+
 package com.testing.integration.tools;
 
 import com.testing.integration.dtos.CustomerData;
 import com.testing.integration.dtos.FinancialRiskAssessment;
 import com.testing.integration.service.FinSentryService;
+
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Component;
 
@@ -19,14 +21,16 @@ public class FinSentryTool {
             name = "analyzeCustomerFinancialRisk",
             description = """
                 Analyze a banking customer's financial health and identify
-                financial distress using the FinSentry financial policies.
+                potential financial distress using the FinSentry financial policies.
 
-                The tool analyzes salary trend, credit utilization, missed EMIs,
-                and account balance changes.
+                The tool evaluates salary trends, credit utilization,
+                missed EMIs, and account balance changes against the
+                connected financial policy knowledge base.
 
-                It returns the financial health score, risk level, risk factors,
-                root cause, recommended actions, source policies, and whether
-                human review is required.
+                It returns the financial health score when an approved
+                scoring formula is available, risk level, risk factors,
+                root cause, policy-supported recommended actions,
+                source policies, and human review requirements.
                 """
     )
     public FinancialRiskAssessment analyzeCustomerFinancialRisk(

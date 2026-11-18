@@ -1,4 +1,3 @@
-
 package com.testing.integration.service;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -28,23 +27,23 @@ public class GroqService {
                 .build();
     }
 
+    // Reusable method for all agents using Groq
+    public String chat(String systemPrompt, String userPrompt) {
 
-
-    public String testConnection() {
-        System.out.println(
-                "Truststore: " +
-                        System.getProperty("javax.net.ssl.trustStore", "JDK default")
-        );
         Map<String, Object> request = Map.of(
                 "model", model,
                 "messages", List.of(
                         Map.of(
+                                "role", "system",
+                                "content", systemPrompt
+                        ),
+                        Map.of(
                                 "role", "user",
-                                "content", "Reply with exactly: Groq connection successful"
+                                "content", userPrompt
                         )
                 ),
                 "temperature", 0.2,
-                "max_completion_tokens", 256
+                "max_completion_tokens", 1024
         );
 
         Map<?, ?> response = restClient.post()
@@ -54,23 +53,56 @@ public class GroqService {
                 .body(request)
                 .retrieve()
                 .body(Map.class);
-        System.out.println("Groq raw response: " + response);
 
         if (response == null) {
-            throw new IllegalStateException("Groq returned an empty response");
-        }
-
-        List<?> choices = (List<?>) response.get("choices");
-
-        if (choices == null || choices.isEmpty()) {
             throw new IllegalStateException(
-                    "Groq response did not contain any choices");
+                    "Groq returned an empty response"
+            );
         }
 
-        Map<?, ?> choice = (Map<?, ?>) choices.get(0);
-        Map<?, ?> message = (Map<?, ?>) choice.get("message");
-        System.out.println("Groq content: " + message.get("content"));
-        return String.valueOf(message.get("content"));
+        Object choicesObject = response.get("choices");
 
+        if (!(choicesObject instanceof List<?> choices)
+                || choices.isEmpty()) {
+
+            throw new IllegalStateException(
+                    "Groq response did not contain any choices"
+            );
+        }
+
+        Object choiceObject = choices.get(0);
+
+        if (!(choiceObject instanceof Map<?, ?> choice)) {
+            throw new IllegalStateException(
+                    "Groq returned an invalid choice"
+            );
+        }
+
+        Object messageObject = choice.get("message");
+
+        if (!(messageObject instanceof Map<?, ?> message)) {
+            throw new IllegalStateException(
+                    "Groq response did not contain a valid message"
+            );
+        }
+
+        Object content = message.get("content");
+
+        if (content == null || content.toString().isBlank()) {
+            throw new IllegalStateException(
+                    "Groq returned empty message content"
+            );
+        }
+
+        return content.toString();
+    }
+
+    // Existing connection test
+    public String testConnection() {
+
+        return chat(
+                "You are a helpful assistant.",
+                "Reply with exactly: Groq connection successful"
+        );
     }
 }

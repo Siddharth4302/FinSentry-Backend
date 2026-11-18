@@ -1,9 +1,10 @@
+
 package com.testing.integration.dtos;
 
 import java.util.List;
 
 public record FinancialRiskAssessment(
-        int financialHealthScore,
+        Integer financialHealthScore,
         String riskLevel,
         List<String> riskFactors,
         String rootCause,
