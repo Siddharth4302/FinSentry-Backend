@@ -13,7 +13,8 @@ import com.testing.integration.service.CustomerService;
 import com.testing.integration.tools.FinSentryTool;
 
 import org.springframework.stereotype.Service;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +27,7 @@ public class FinSentryOrchestrator {
     private final RecommendationAgent recommendationAgent;
     private final FinSentryTool finSentryTool;
     private final CustomerService customerService;
+    private static final Logger log = LoggerFactory.getLogger(FinSentryOrchestrator.class);
 
     public FinSentryOrchestrator(
             MonitoringAgent monitoringAgent,
@@ -100,37 +102,74 @@ public class FinSentryOrchestrator {
     }
 
     // Run complete four-agent pipeline
+
     public Map<String, Object> completeAnalysis(Long customerId) {
+
+        log.info("========== FinSentry Complete Analysis Started ==========");
+        log.info("Customer ID: {}", customerId);
+
+        // Fetch customer data
+        log.info("[Orchestrator] Fetching customer data");
 
         CustomerData customerData = getCustomerData(customerId);
 
-        // Step 1: Monitoring
+        log.info("[Orchestrator] Customer data fetched successfully");
+
+        // Step 1: Monitoring Agent
+        log.info("[Monitoring Agent] Execution started");
+
         List<String> riskSignals =
                 monitoringAgent.monitor(customerData);
 
-        // Step 2: Investigation
+        log.info("[Monitoring Agent] Execution completed. Risk signals detected: {}",
+                riskSignals.size());
+        log.info("[Monitoring Agent] Risk signals: {}", riskSignals);
+
+        // Step 2: Investigation Agent
+        log.info("[Investigation Agent] Execution started");
+
         String investigationFindings =
                 investigationAgent.investigate(
                         customerData,
                         riskSignals
                 );
 
-        // Step 3: Policy validation and financial scoring
+        log.info("[Investigation Agent] Execution completed");
+        log.info("[Investigation Agent] Findings: {}", investigationFindings);
+
+        // Step 3: Policy Agent
+        log.info("[Policy Agent] Execution started");
+
         FinancialRiskAssessment assessment =
                 policyAgent.validate(
                         customerData,
                         investigationFindings
                 );
 
-        // Step 4: Recommendation refinement
+        log.info("[Policy Agent] Execution completed");
+        log.info("[Policy Agent] Financial Health Score: {}",
+                assessment.financialHealthScore());
+        log.info("[Policy Agent] Risk Level: {}",
+                assessment.riskLevel());
+
+        // Step 4: Recommendation Agent
+        log.info("[Recommendation Agent] Execution started");
+
         String refinedRecommendations =
                 recommendationAgent.refineRecommendations(assessment);
+
+        log.info("[Recommendation Agent] Execution completed");
+        log.info("[Recommendation Agent] Refined recommendations: {}",
+                refinedRecommendations);
+
+        log.info("========== FinSentry Complete Analysis Finished ==========");
 
         return Map.of(
                 "policyAssessment", assessment,
                 "refinedRecommendations", refinedRecommendations
         );
     }
+
 
     // Test Policy Agent independently
     public FinancialRiskAssessment testPolicyAgent(Long customerId) {

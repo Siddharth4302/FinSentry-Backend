@@ -4,7 +4,8 @@ package com.testing.integration.controller;
 import com.testing.integration.dtos.CustomerData;
 import com.testing.integration.dtos.FinancialRiskAssessment;
 import com.testing.integration.orchestration.FinSentryOrchestrator;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +16,7 @@ import java.util.Map;
 public class FinSentryAgentController {
 
     private final FinSentryOrchestrator orchestrator;
+    private static final Logger log = LoggerFactory.getLogger(FinSentryOrchestrator.class);
 
     public FinSentryAgentController(
             FinSentryOrchestrator orchestrator
@@ -71,7 +73,7 @@ public class FinSentryAgentController {
     public ResponseEntity<Map<String, Object>> completeAnalysis(
             @PathVariable Long customerId
     ) {
-
+        log.info(">>> COMPLETE ANALYSIS CONTROLLER HIT <<<");
         return ResponseEntity.ok(
                 orchestrator.completeAnalysis(customerId)
         );
@@ -82,7 +84,7 @@ public class FinSentryAgentController {
     public ResponseEntity<FinancialRiskAssessment> testPolicyAgent(
             @PathVariable Long customerId
     ) {
-
+        log.info(">>> COMPLETE ANALYSIS CONTROLLER HIT <<<");
         return ResponseEntity.ok(
                 orchestrator.testPolicyAgent(customerId)
         );
